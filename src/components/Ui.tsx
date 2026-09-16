@@ -19,7 +19,9 @@ export function Cartao({
           <div className="min-w-0">
             {titulo && <h2 className="text-sm font-semibold text-tinta">{titulo}</h2>}
             {subtitulo && (
-              <p className="mt-0.5 text-xs leading-relaxed text-tinta-3">{subtitulo}</p>
+              // `borrar`: subtítulos costumam citar números em texto corrido,
+              // que o seletor .tnum do modo privado não alcança.
+              <p className="borrar mt-0.5 text-xs leading-relaxed text-tinta-3">{subtitulo}</p>
             )}
           </div>
           {acao && <div className="shrink-0">{acao}</div>}

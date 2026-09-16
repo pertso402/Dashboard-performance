@@ -52,6 +52,29 @@ body {
   font-feature-settings: 'tnum';
 }
 
+/* Modo privado — para abrir o painel perto de alguém que não deve ver os valores.
+   Borra todo número (.tnum cobre as métricas) e os rótulos dos eixos dos gráficos. */
+.privado .tnum,
+.privado .borrar,
+.privado .recharts-cartesian-axis-tick-value {
+  filter: blur(7px);
+  user-select: none;
+  cursor: default;
+}
+
+/* O gráfico em si continua visível: a forma da curva não entrega valor. */
+.privado .recharts-tooltip-wrapper {
+  display: none !important;
+}
+
+@media print {
+  .privado .tnum,
+  .privado .borrar,
+  .privado .recharts-cartesian-axis-tick-value {
+    filter: none;
+  }
+}
+
 ::selection {
   background: #dbeafe;
 }

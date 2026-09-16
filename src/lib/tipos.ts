@@ -165,12 +165,14 @@ export type TipoVenda =
   | 'recompra_agente'
   | 'recompra_espontanea'
   | 'venda_manual'
+  | 'canal_externo'
 
 export type BlocoAtribuicao = {
   receita_atribuida: number | string
   receita_erp_atribuida: number | string
   receita_manual: number | string
   vendas_manuais: number
+  receita_externa: number | string
   pedidos_atribuidos: number
   pedidos_erp_atribuidos: number
   receita_nao_atribuida: number | string
@@ -207,6 +209,17 @@ export type Atribuicao = {
     cliente: string | null
     valor: number | string
     itens: number | null
+    observacao: string | null
+  }[]
+  /** Canais que não passam pelo ERP (iFood hoje). Rateados por dia no período. */
+  externas: {
+    canal: string
+    atribuida: boolean
+    valor_periodo: number | string
+    valor_total: number | string
+    dias_lancamento: number
+    dias_no_periodo: number
+    ticket_medio: number | string | null
     observacao: string | null
   }[]
 }

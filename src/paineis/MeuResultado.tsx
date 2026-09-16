@@ -4,6 +4,17 @@ import { dataLonga, money, n, num, pct } from '../lib/format'
 import { vendaCor, vendaLabel, VENDA_DESCRICAO } from '../lib/origens'
 import type { Painel, TipoVenda } from '../lib/tipos'
 
+/** Linha de "De onde veio cada real". Canais externos entram com rótulo próprio. */
+type Linha = Painel['atribuicao']['por_tipo'][number] & {
+  chave?: string
+  rotulo?: string
+}
+
+const CANAL_LABEL: Record<string, string> = {
+  ifood: 'iFood',
+  convenio: 'Convênio',
+}
+
 export function MeuResultado({ dados }: { dados: Painel }) {
   const a = dados.atribuicao
   const atual = a.atual
@@ -15,9 +26,9 @@ export function MeuResultado({ dados }: { dados: Painel }) {
   const fatiaAnterior =
     n(ant.receita_casa) > 0 ? (n(ant.receita_atribuida) / n(ant.receita_casa)) * 100 : 0
 
-  // As vendas fechadas na mão não existem como pedido no ERP, então entram aqui
-  // como uma linha sintética — sem ela os percentuais do grupo não fecham 100%.
-  const minhas = [...a.por_tipo.filter((t) => t.atribuido)]
+  // Venda na mão e canais fora do ERP não existem como pedido, então entram aqui
+  // como linhas sintéticas — sem elas os percentuais do grupo não fecham 100%.
+  const minhas: Linha[] = a.por_tipo.filter((t) => t.atribuido)
   if (n(atual.receita_manual) > 0) {
     minhas.push({
       tipo_venda: 'venda_manual',
@@ -28,9 +39,36 @@ export function MeuResultado({ dados }: { dados: Painel }) {
       ticket: n(atual.receita_manual) / Math.max(1, atual.vendas_manuais),
     })
   }
+  for (const e of a.externas) {
+    if (!e.atribuida || n(e.valor_periodo) <= 0) continue
+    minhas.push({
+      tipo_venda: 'canal_externo',
+      atribuido: true,
+      pedidos: 0,
+      clientes: 0,
+      receita: n(e.valor_periodo),
+      ticket: e.ticket_medio,
+      chave: `ext-${e.canal}`,
+      rotulo: CANAL_LABEL[e.canal] ?? e.canal,
+    })
+  }
   minhas.sort((x, y) => n(y.receita) - n(x.receita))
 
-  const daCasa = a.por_tipo.filter((t) => !t.atribuido)
+  const daCasa: Linha[] = a.por_tipo.filter((t) => !t.atribuido)
+  for (const e of a.externas) {
+    if (e.atribuida || n(e.valor_periodo) <= 0) continue
+    daCasa.push({
+      tipo_venda: 'canal_externo',
+      atribuido: false,
+      pedidos: 0,
+      clientes: 0,
+      receita: n(e.valor_periodo),
+      ticket: e.ticket_medio,
+      chave: `ext-${e.canal}`,
+      rotulo: CANAL_LABEL[e.canal] ?? e.canal,
+    })
+  }
+
   const maxReceita = Math.max(...minhas.map((t) => n(t.receita)), 1)
 
   const novosNoPeriodo = a.serie.reduce((s, d) => s + n(d.novos), 0)
@@ -47,18 +85,19 @@ export function MeuResultado({ dados }: { dados: Painel }) {
             <p className="mt-2 text-5xl font-semibold tracking-tight tnum text-tinta">
               {money(receita)}
             </p>
-            <p className="mt-2 text-sm text-tinta-2">
+            <p className="borrar mt-2 text-sm text-tinta-2">
               <strong className="font-semibold tnum text-tinta">{pct(fatia)}</strong> de todo o
               faturamento do delivery no período ({money(casa)}).
             </p>
-            {n(atual.receita_manual) > 0 && (
-              <p className="mt-1 text-xs text-tinta-3">
-                Inclui {money(atual.receita_manual)} de{' '}
-                {num(atual.vendas_manuais)}{' '}
-                {atual.vendas_manuais === 1 ? 'venda fechada' : 'vendas fechadas'} na mão ·{' '}
-                {money(atual.receita_erp_atribuida)} vieram pelo sistema.
-              </p>
-            )}
+            <p className="borrar mt-1 text-xs text-tinta-3">
+              {money(atual.receita_erp_atribuida)} pelo sistema
+              {n(atual.receita_externa) > 0 && ` · ${money(atual.receita_externa)} do iFood`}
+              {n(atual.receita_manual) > 0 &&
+                ` · ${money(atual.receita_manual)} de ${num(atual.vendas_manuais)} ${
+                  atual.vendas_manuais === 1 ? 'venda fechada' : 'vendas fechadas'
+                } na mão`}
+              .
+            </p>
             <div className="mt-3">
               <Variacao atual={receita} anterior={n(ant.receita_atribuida)} />
             </div>
@@ -79,7 +118,7 @@ export function MeuResultado({ dados }: { dados: Painel }) {
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-neutro-1" />
-                Da casa {money(n(atual.receita_nao_atribuida))}
+                <span className="borrar">Da casa {money(n(atual.receita_nao_atribuida))}</span>
               </span>
             </div>
             {fatiaAnterior > 0 && (
@@ -222,7 +261,7 @@ function LinhasVenda({
   max,
   total,
 }: {
-  linhas: Painel['atribuicao']['por_tipo']
+  linhas: Linha[]
   max: number
   total: number
 }) {
@@ -233,7 +272,7 @@ function LinhasVenda({
         const r = n(t.receita)
         const share = total > 0 ? (r / total) * 100 : 0
         return (
-          <div key={t.tipo_venda}>
+          <div key={t.chave ?? t.tipo_venda}>
             <div className="flex items-baseline justify-between gap-4">
               <span
                 className="flex min-w-0 items-center gap-2 text-sm text-tinta"
@@ -246,9 +285,10 @@ function LinhasVenda({
                 <span className="truncate">
                   {/* "Recompra espontânea" existe nos dois grupos: sem o complemento,
                       as duas linhas ficariam com o mesmo nome dentro do mesmo cartão. */}
-                  {t.tipo_venda === 'recompra_espontanea' && !t.atribuido
-                    ? 'Recompra de cliente da casa'
-                    : vendaLabel(t.tipo_venda)}
+                  {t.rotulo ??
+                    (t.tipo_venda === 'recompra_espontanea' && !t.atribuido
+                      ? 'Recompra de cliente da casa'
+                      : vendaLabel(t.tipo_venda))}
                 </span>
               </span>
               <span className="shrink-0 text-sm font-semibold tnum text-tinta">{money(r)}</span>
@@ -256,9 +296,11 @@ function LinhasVenda({
             <div className="mt-1.5 flex items-center gap-3">
               <BarraMini valor={r} max={max} cor={vendaCor(t.tipo_venda)} />
               <span className="shrink-0 text-xs tnum text-tinta-3">
-                {t.tipo_venda === 'venda_manual'
-                  ? `${num(t.pedidos)} ${t.pedidos === 1 ? 'venda' : 'vendas'} · ${pct(share)}`
-                  : `${num(t.pedidos)} ped · ${num(t.clientes)} cli · ${pct(share)}`}
+                {t.tipo_venda === 'canal_externo'
+                  ? `fora do ERP · ${pct(share)}`
+                  : t.tipo_venda === 'venda_manual'
+                    ? `${num(t.pedidos)} ${t.pedidos === 1 ? 'venda' : 'vendas'} · ${pct(share)}`
+                    : `${num(t.pedidos)} ped · ${num(t.clientes)} cli · ${pct(share)}`}
               </span>
             </div>
           </div>

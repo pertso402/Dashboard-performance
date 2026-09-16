@@ -33,6 +33,24 @@ export default function App() {
   const [erro, setErro] = useState<string | null>(null)
   const [atualizadoEm, setAtualizadoEm] = useState<Date | null>(null)
 
+  // Modo privado: borra os números para abrir o painel perto de quem não deve vê-los.
+  const [privado, setPrivado] = useState(() => {
+    try {
+      return localStorage.getItem('dash-privado') === '1'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    document.body.classList.toggle('privado', privado)
+    try {
+      localStorage.setItem('dash-privado', privado ? '1' : '0')
+    } catch {
+      /* navegador sem storage: o modo continua valendo só nesta sessão */
+    }
+  }, [privado])
+
   useEffect(() => {
     limitesDeData().then(setLimites).catch(() => setLimites(null))
   }, [])
@@ -96,6 +114,21 @@ export default function App() {
                   Atualizado {atualizadoEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
+              <button
+                onClick={() => setPrivado((v) => !v)}
+                aria-pressed={privado}
+                title={privado ? 'Mostrar os números' : 'Esconder os números'}
+                className={`grid size-8 place-items-center rounded-lg border transition ${
+                  privado
+                    ? 'border-tinta bg-tinta text-white'
+                    : 'border-borda text-tinta-2 hover:bg-fundo hover:text-tinta'
+                }`}
+              >
+                <span className="sr-only">
+                  {privado ? 'Mostrar os números' : 'Esconder os números'}
+                </span>
+                <OlhoIcone fechado={privado} />
+              </button>
               <button
                 onClick={() => window.print()}
                 className="rounded-lg border border-borda px-3 py-1.5 text-xs font-medium text-tinta-2 transition hover:bg-fundo hover:text-tinta"
@@ -194,6 +227,35 @@ export default function App() {
         </footer>
       </main>
     </div>
+  )
+}
+
+function OlhoIcone({ fechado }: { fechado: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-[17px]"
+      aria-hidden="true"
+    >
+      {fechado ? (
+        <>
+          <path d="M10.6 5.1A9.9 9.9 0 0 1 12 5c5.5 0 9 6 9 6a15 15 0 0 1-3 3.6" />
+          <path d="M6.6 6.6A15 15 0 0 0 3 11s3.5 6 9 6a9.6 9.6 0 0 0 4.3-1" />
+          <path d="M9.9 8.9a3 3 0 1 0 4.2 4.2" />
+          <path d="m3 3 18 18" />
+        </>
+      ) : (
+        <>
+          <path d="M3 11s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" />
+          <circle cx="12" cy="11" r="2.8" />
+        </>
+      )}
+    </svg>
   )
 }
 

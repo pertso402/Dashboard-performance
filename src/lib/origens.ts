@@ -72,6 +72,7 @@ export const VENDA_LABEL: Record<TipoVenda, string> = {
   recompra_agente: 'Recompra puxada pelo agente',
   recompra_espontanea: 'Recompra espontânea',
   venda_manual: 'Venda fechada na mão',
+  canal_externo: 'Canal fora do ERP',
   aquisicao_organica: 'Cliente novo orgânico',
 }
 
@@ -82,6 +83,7 @@ export const VENDA_COR: Record<TipoVenda, string> = {
   aquisicao_qr_ifood: 'var(--color-serie-4)',
   recompra_espontanea: 'var(--color-serie-5)',
   venda_manual: 'var(--color-serie-7)',
+  canal_externo: 'var(--color-serie-3)',
   aquisicao_organica: 'var(--color-neutro-1)',
 }
 
@@ -94,6 +96,8 @@ export const VENDA_DESCRICAO: Record<TipoVenda, string> = {
   recompra_espontanea: 'Cliente que você trouxe voltou sozinho, sem precisar de oferta.',
   venda_manual:
     'Negociação fechada pessoalmente por você, fora do fluxo do sistema. Lançada à mão.',
+  canal_externo:
+    'Receita de um canal que não passa pelo ERP, informada manualmente e rateada por dia dentro do período.',
   aquisicao_organica: 'Cliente novo que chegou sozinho ao restaurante. Não conta como seu.',
 }
 
