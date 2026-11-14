@@ -1,3 +1,4 @@
+import { AnuncioTotal } from './AnuncioTotal'
 import { GraficoAtribuicao, GraficoNovosClientes } from '../components/Graficos'
 import { BarraMini, Cartao, Kpi, Variacao, Vazio } from '../components/Ui'
 import { dataLonga, money, n, num, pct } from '../lib/format'
@@ -134,7 +135,7 @@ export function MeuResultado({ dados }: { dados: Painel }) {
           detalhe={`${num(atual.clientes_ativos)} clientes seus compraram no período`}
           rodape={<Variacao atual={atual.clientes_novos} anterior={ant.clientes_novos} />}
           destaque
-          ajuda="Clientes cujo primeiro pedido caiu no período e cuja origem é anúncio, roleta (QR da embalagem ou link do agente) ou reativação pelo agente."
+          ajuda="Clientes cujo primeiro pedido caiu no período: anúncio, roleta, reativação pelo agente, WhatsApp, balcão ou instagram. Só a base antiga fica de fora."
         />
         <Kpi
           rotulo="Pedidos meus"
@@ -165,6 +166,9 @@ export function MeuResultado({ dados }: { dados: Painel }) {
           ajuda="Quanto do faturamento total do delivery no período saiu do trabalho de marketing."
         />
       </div>
+
+      {/* ---- Anúncio desde o início ---- */}
+      <AnuncioTotal a={dados.anuncioTotal} />
 
       {/* ---- Evolução ---- */}
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -284,7 +288,9 @@ function LinhasVenda({
                   {t.rotulo ??
                     (t.tipo_venda === 'recompra_espontanea' && !t.atribuido
                       ? 'Recompra de cliente da casa'
-                      : vendaLabel(t.tipo_venda))}
+                      : t.tipo_venda === 'aquisicao_organica' && !t.atribuido
+                        ? '1ª compra de cliente da base antiga'
+                        : vendaLabel(t.tipo_venda))}
                 </span>
               </span>
               <span className="shrink-0 text-sm font-semibold tnum text-tinta">{money(r)}</span>

@@ -1,5 +1,6 @@
 import { Aviso, BarraMini, Cartao, Kpi, Vazio } from '../components/Ui'
 import { GraficoBarrasOrigem } from '../components/Graficos'
+import { AnuncioTotal } from './AnuncioTotal'
 import { dataLonga, dias, money, num, pct } from '../lib/format'
 import { cor, label, ORIGEM_DESCRICAO } from '../lib/origens'
 import type { Origem, Painel } from '../lib/tipos'
@@ -23,6 +24,8 @@ export function Aquisicao({ dados }: { dados: Painel }) {
 
   return (
     <div className="space-y-5">
+      <AnuncioTotal a={dados.anuncioTotal} />
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
           rotulo="Clientes vindos de anúncio"

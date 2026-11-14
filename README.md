@@ -38,8 +38,13 @@ Uma venda é **atribuída** quando qualquer uma destas é verdadeira:
 
 Receita de **iFood** e **Keeta** entra por `receitas_externas` (`atribuida = true`).
 
-Fica de fora o que não tem origem comprovada: WhatsApp orgânico, balcão, instagram e a base
-antiga comprando por conta própria.
+- o cliente é **novo** — 1º pedido no sistema por WhatsApp orgânico, balcão ou instagram.
+
+Fica de fora só a base antiga comprando por conta própria (`base_legada` e `cliente_antigo`).
+
+**Anúncio desde o início:** `dash_anuncio_total()` compara todo o investido em `meta_ads` com a
+receita vitalícia dos clientes de anúncio (CAC, LTV, ROAS, ROI). Custo por conversa e CPM vêm de
+`dash_config` (`meta_custo_por_conversa`, `meta_cpm`).
 
 **Rastreio de anúncio:** além do `externalAdReplyInfo` que o agente lê, um trigger em
 `n8n_chat_histories` e `cw_messages` marca `veio_de_anuncio` quando a 1ª mensagem do contato é o
@@ -56,9 +61,9 @@ Definida uma única vez, na aquisição, e nesta ordem:
 | `anuncio` | `clientes.veio_de_anuncio = true` **ou** 1º pedido no canal `whatsapp_anuncio`. | Sim |
 | `reativacao_agente` | 1º pedido no canal `recompra` — estava parado na base e o agente acordou. | Sim |
 | `base_legada` | Cadastrado no dia da carga inicial (`dash_config.base_legada_data`, hoje `2026-08-04`). | Não |
-| `instagram` / `balcao` | Canal do 1º pedido. | Não |
+| `instagram` / `balcao` | Canal do 1º pedido. | Sim |
 | `cliente_antigo` | 1º pedido no canal `whatsapp` genérico — já era cliente da casa. | Não |
-| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Não |
+| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Sim |
 | `lead_sem_compra` | Está no banco e nunca pediu. | Não |
 
 Recompra de um cliente de anúncio continua contando como anúncio — a origem não muda a cada

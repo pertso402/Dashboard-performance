@@ -142,6 +142,26 @@ export type CacRoas = {
   cobertura_investimento: 'sem_dados' | 'parcial' | 'completa'
 }
 
+export type AnuncioTotal = {
+  investido: number | string
+  campanha_inicio: string | null
+  campanha_fim: string | null
+  custo_por_conversa: number | string | null
+  cpm: number | string | null
+  conversas_estimadas: number | string | null
+  impressoes_estimadas: number | string | null
+  leads: number
+  clientes: number
+  recompraram: number
+  pedidos: number
+  receita: number | string
+  cac: number | string | null
+  custo_por_lead: number | string | null
+  ltv: number | string | null
+  roas: number | string | null
+  roi_pct: number | string | null
+}
+
 export type Painel = {
   atribuicao: Atribuicao
   kpis: Kpis
@@ -151,6 +171,7 @@ export type Painel = {
   funil: Funil
   campanha: Campanha
   cac: CacRoas
+  anuncioTotal: AnuncioTotal
 }
 
 // ---------------------------------------------------------------------------
