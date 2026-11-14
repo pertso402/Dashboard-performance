@@ -1,13 +1,13 @@
 import type { Origem, TipoVenda } from './tipos'
 
 /**
- * Origem do cliente. Todo cliente novo (anúncio, QR, agente, WhatsApp, balcão,
- * instagram) conta como marketing e recebe cor; só o que já era do restaurante fica neutro — a diferença entre
+ * Origem do cliente. As três origens geradas pelo marketing recebem cor;
+ * as que já eram do restaurante ficam em tom neutro — a diferença entre
  * "meu" e "da casa" precisa saltar antes de qualquer legenda ser lida.
  */
 export const ORIGEM_LABEL: Record<Origem, string> = {
   anuncio: 'Anúncio',
-  qr_ifood: 'QR do iFood',
+  qr_ifood: 'Roleta',
   reativacao_agente: 'Reativado pelo agente',
   organico: 'Orgânico',
   balcao: 'Balcão',
@@ -21,8 +21,8 @@ export const ORIGEM_COR: Record<Origem, string> = {
   anuncio: 'var(--color-serie-1)',
   reativacao_agente: 'var(--color-serie-2)',
   qr_ifood: 'var(--color-serie-4)',
-  organico: 'var(--color-serie-3)',
-  balcao: 'var(--color-serie-7)',
+  organico: 'var(--color-neutro-1)',
+  balcao: 'var(--color-neutro-1)',
   instagram: 'var(--color-serie-5)',
   cliente_antigo: 'var(--color-neutro-2)',
   base_legada: 'var(--color-neutro-2)',
@@ -34,9 +34,9 @@ export const ORIGEM_ATRIBUIDA: Record<Origem, boolean> = {
   anuncio: true,
   qr_ifood: true,
   reativacao_agente: true,
-  organico: true,
-  balcao: true,
-  instagram: true,
+  organico: false,
+  balcao: false,
+  instagram: false,
   cliente_antigo: false,
   base_legada: false,
   lead_sem_compra: false,
@@ -44,9 +44,9 @@ export const ORIGEM_ATRIBUIDA: Record<Origem, boolean> = {
 
 export const ORIGEM_DESCRICAO: Record<Origem, string> = {
   anuncio:
-    'Cliente marcado com veio_de_anuncio ou cujo 1º pedido entrou pelo canal whatsapp_anuncio.',
+    'Abriu a conversa por um anúncio da Meta (dado do anúncio ou a mensagem padrão "Olá! Posso ter mais informações sobre isso?") ou fez o 1º pedido pelo canal whatsapp_anuncio.',
   qr_ifood:
-    'Leu o QR code que vai junto do pedido do iFood, girou a roleta e deixou o contato.',
+    'Girou a roleta e deixou o contato — pelo QR code da embalagem do iFood ou pelo link que o agente de recompra manda.',
   reativacao_agente:
     'Já estava na base sem nunca ter pedido no sistema. O agente mandou oferta e ele comprou — é primeira venda, não recompra.',
   organico:
@@ -67,13 +67,13 @@ export const ehMinha = (o: string) => ORIGEM_ATRIBUIDA[o as Origem] ?? false
 /** Tipo da venda — o que exatamente gerou aquele pedido. */
 export const VENDA_LABEL: Record<TipoVenda, string> = {
   aquisicao_anuncio: 'Cliente novo do anúncio',
-  aquisicao_qr_ifood: 'Cliente novo do QR do iFood',
+  aquisicao_qr_ifood: 'Cliente novo da roleta',
   reativacao_agente: 'Reativação pelo agente',
   recompra_agente: 'Recompra puxada pelo agente',
   recompra_espontanea: 'Recompra espontânea',
   venda_manual: 'Venda fechada na mão',
   canal_externo: 'Canal fora do ERP',
-  aquisicao_organica: 'Cliente novo (WhatsApp / balcão)',
+  aquisicao_organica: 'Cliente novo orgânico',
 }
 
 export const VENDA_COR: Record<TipoVenda, string> = {
@@ -84,12 +84,12 @@ export const VENDA_COR: Record<TipoVenda, string> = {
   recompra_espontanea: 'var(--color-serie-5)',
   venda_manual: 'var(--color-serie-7)',
   canal_externo: 'var(--color-serie-3)',
-  aquisicao_organica: 'var(--color-serie-3)',
+  aquisicao_organica: 'var(--color-neutro-1)',
 }
 
 export const VENDA_DESCRICAO: Record<TipoVenda, string> = {
   aquisicao_anuncio: 'Primeira compra de quem chegou pelo anúncio.',
-  aquisicao_qr_ifood: 'Primeira compra de quem veio pelo QR code do iFood.',
+  aquisicao_qr_ifood: 'Primeira compra de quem girou a roleta (QR da embalagem ou link do agente).',
   reativacao_agente:
     'Primeira compra de um contato que estava parado na base e o agente acordou.',
   recompra_agente: 'Cliente voltou depois de receber oferta do agente de recompra.',
@@ -98,8 +98,7 @@ export const VENDA_DESCRICAO: Record<TipoVenda, string> = {
     'Negociação fechada pessoalmente por você, fora do fluxo do sistema. Lançada à mão.',
   canal_externo:
     'Receita de um canal que não passa pelo ERP, informada manualmente e rateada por dia dentro do período.',
-  aquisicao_organica:
-    'Primeira compra de cliente novo que chegou pelo WhatsApp, balcão ou instagram. Conta como seu; só a base antiga fica de fora.',
+  aquisicao_organica: 'Cliente novo que chegou sozinho ao restaurante. Não conta como seu.',
 }
 
 export const vendaLabel = (t: string) => VENDA_LABEL[t as TipoVenda] ?? t

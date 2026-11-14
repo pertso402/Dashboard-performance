@@ -134,7 +134,7 @@ export function MeuResultado({ dados }: { dados: Painel }) {
           detalhe={`${num(atual.clientes_ativos)} clientes seus compraram no período`}
           rodape={<Variacao atual={atual.clientes_novos} anterior={ant.clientes_novos} />}
           destaque
-          ajuda="Clientes cujo primeiro pedido caiu no período: anúncio, QR do iFood, reativação pelo agente, WhatsApp, balcão ou instagram. Só a base antiga fica de fora."
+          ajuda="Clientes cujo primeiro pedido caiu no período e cuja origem é anúncio, roleta (QR da embalagem ou link do agente) ou reativação pelo agente."
         />
         <Kpi
           rotulo="Pedidos meus"
@@ -284,9 +284,7 @@ function LinhasVenda({
                   {t.rotulo ??
                     (t.tipo_venda === 'recompra_espontanea' && !t.atribuido
                       ? 'Recompra de cliente da casa'
-                      : t.tipo_venda === 'aquisicao_organica' && !t.atribuido
-                        ? '1ª compra de cliente da base antiga'
-                        : vendaLabel(t.tipo_venda))}
+                      : vendaLabel(t.tipo_venda))}
                 </span>
               </span>
               <span className="shrink-0 text-sm font-semibold tnum text-tinta">{money(r)}</span>

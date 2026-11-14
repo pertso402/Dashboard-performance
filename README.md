@@ -35,12 +35,16 @@ Uma venda é **atribuída** quando qualquer uma destas é verdadeira:
 - o cliente veio do **QR code do iFood** (tem registro em `roleta_resgates`);
 - o pedido foi gerado pelo **agente de recompra** (`canal = 'recompra'`) — inclusive para
   clientes que o restaurante já tinha, porque aquela venda extra não aconteceria sozinha;
-- o cliente é **novo** — fez o 1º pedido no sistema por WhatsApp orgânico, balcão ou instagram
-  (desde 14/11/2026, ver `sql/2026-11-14_atribuicao_todo_cliente_novo.sql`).
 
 Receita de **iFood** e **Keeta** entra por `receitas_externas` (`atribuida = true`).
 
-Fica de fora só a base antiga comprando por conta própria (`base_legada` e `cliente_antigo`).
+Fica de fora o que não tem origem comprovada: WhatsApp orgânico, balcão, instagram e a base
+antiga comprando por conta própria.
+
+**Rastreio de anúncio:** além do `externalAdReplyInfo` que o agente lê, um trigger em
+`n8n_chat_histories` e `cw_messages` marca `veio_de_anuncio` quando a 1ª mensagem do contato é o
+texto padrão do Click-to-WhatsApp ("Olá! Posso ter mais informações sobre isso?") — ver
+`sql/2026-11-14b_rastreio_anuncio_e_sem_organico.sql`.
 
 ### Origem do cliente
 
@@ -52,9 +56,9 @@ Definida uma única vez, na aquisição, e nesta ordem:
 | `anuncio` | `clientes.veio_de_anuncio = true` **ou** 1º pedido no canal `whatsapp_anuncio`. | Sim |
 | `reativacao_agente` | 1º pedido no canal `recompra` — estava parado na base e o agente acordou. | Sim |
 | `base_legada` | Cadastrado no dia da carga inicial (`dash_config.base_legada_data`, hoje `2026-08-04`). | Não |
-| `instagram` / `balcao` | Canal do 1º pedido. | Sim |
+| `instagram` / `balcao` | Canal do 1º pedido. | Não |
 | `cliente_antigo` | 1º pedido no canal `whatsapp` genérico — já era cliente da casa. | Não |
-| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Sim |
+| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Não |
 | `lead_sem_compra` | Está no banco e nunca pediu. | Não |
 
 Recompra de um cliente de anúncio continua contando como anúncio — a origem não muda a cada

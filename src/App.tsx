@@ -210,11 +210,12 @@ export default function App() {
         <footer className="mt-10 border-t border-borda pt-5 text-xs leading-relaxed text-tinta-3">
           <p>
             <strong className="font-medium text-tinta-2">O que conta como meu.</strong>{' '}
-            Uma venda entra na receita atribuída quando vem de um <em>cliente novo</em> — de{' '}
-            <em>anúncio</em>, do <em>QR code do iFood</em> (roleta), do WhatsApp, do balcão ou do
-            instagram — ou quando o <em>agente de recompra</em> gerou aquele pedido, inclusive para
-            clientes que o restaurante já tinha. As vendas de <em>iFood</em> e <em>Keeta</em> também
-            entram. Fica de fora só quem já era da base antiga do restaurante comprando sozinho.
+            Uma venda entra na receita atribuída quando o cliente veio de <em>anúncio</em>, girou a{' '}
+            <em>roleta</em> (QR code da embalagem ou link do agente), ou quando o{' '}
+            <em>agente de recompra</em> gerou aquele pedido — inclusive para clientes que o
+            restaurante já tinha. As vendas de <em>iFood</em> e <em>Keeta</em> também entram. Fica de
+            fora quem chegou pelo WhatsApp orgânico ou pelo balcão sem origem comprovada, e a base
+            antiga comprando sozinha.
           </p>
           <p className="mt-2">
             <strong className="font-medium text-tinta-2">Como as contas são feitas.</strong>{' '}
