@@ -34,10 +34,13 @@ Uma venda é **atribuída** quando qualquer uma destas é verdadeira:
 - o cliente veio de **anúncio** (`veio_de_anuncio` ou 1º pedido no canal `whatsapp_anuncio`);
 - o cliente veio do **QR code do iFood** (tem registro em `roleta_resgates`);
 - o pedido foi gerado pelo **agente de recompra** (`canal = 'recompra'`) — inclusive para
-  clientes que o restaurante já tinha, porque aquela venda extra não aconteceria sozinha.
+  clientes que o restaurante já tinha, porque aquela venda extra não aconteceria sozinha;
+- o cliente é **novo** — fez o 1º pedido no sistema por WhatsApp orgânico, balcão ou instagram
+  (desde 14/11/2026, ver `sql/2026-11-14_atribuicao_todo_cliente_novo.sql`).
 
-Fica de fora o movimento próprio da casa: WhatsApp orgânico, balcão, instagram e a base
-antiga comprando por conta própria.
+Receita de **iFood** e **Keeta** entra por `receitas_externas` (`atribuida = true`).
+
+Fica de fora só a base antiga comprando por conta própria (`base_legada` e `cliente_antigo`).
 
 ### Origem do cliente
 
@@ -49,9 +52,9 @@ Definida uma única vez, na aquisição, e nesta ordem:
 | `anuncio` | `clientes.veio_de_anuncio = true` **ou** 1º pedido no canal `whatsapp_anuncio`. | Sim |
 | `reativacao_agente` | 1º pedido no canal `recompra` — estava parado na base e o agente acordou. | Sim |
 | `base_legada` | Cadastrado no dia da carga inicial (`dash_config.base_legada_data`, hoje `2026-08-04`). | Não |
-| `instagram` / `balcao` | Canal do 1º pedido. | Não |
+| `instagram` / `balcao` | Canal do 1º pedido. | Sim |
 | `cliente_antigo` | 1º pedido no canal `whatsapp` genérico — já era cliente da casa. | Não |
-| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Não |
+| `organico` | Qualquer outro canal no 1º pedido (na prática, `whatsapp_organico`). | Sim |
 | `lead_sem_compra` | Está no banco e nunca pediu. | Não |
 
 Recompra de um cliente de anúncio continua contando como anúncio — a origem não muda a cada

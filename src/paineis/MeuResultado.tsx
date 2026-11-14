@@ -12,7 +12,27 @@ type Linha = Painel['atribuicao']['por_tipo'][number] & {
 
 const CANAL_LABEL: Record<string, string> = {
   ifood: 'iFood',
+  keeta: 'Keeta',
   convenio: 'Convênio',
+}
+
+/** Junta lançamentos do mesmo canal (ex.: dois meses de iFood que cruzam o período) numa linha só. */
+function somarPorCanal(externas: Painel['atribuicao']['externas'], atribuida: boolean): Linha[] {
+  const porCanal = new Map<string, number>()
+  for (const e of externas) {
+    if (e.atribuida !== atribuida || n(e.valor_periodo) <= 0) continue
+    porCanal.set(e.canal, (porCanal.get(e.canal) ?? 0) + n(e.valor_periodo))
+  }
+  return [...porCanal].map(([canal, receita]) => ({
+    tipo_venda: 'canal_externo',
+    atribuido: atribuida,
+    pedidos: 0,
+    clientes: 0,
+    receita,
+    ticket: 0,
+    chave: `ext-${canal}`,
+    rotulo: CANAL_LABEL[canal] ?? canal,
+  }))
 }
 
 export function MeuResultado({ dados }: { dados: Painel }) {
@@ -39,35 +59,11 @@ export function MeuResultado({ dados }: { dados: Painel }) {
       ticket: n(atual.receita_manual) / Math.max(1, atual.vendas_manuais),
     })
   }
-  for (const e of a.externas) {
-    if (!e.atribuida || n(e.valor_periodo) <= 0) continue
-    minhas.push({
-      tipo_venda: 'canal_externo',
-      atribuido: true,
-      pedidos: 0,
-      clientes: 0,
-      receita: n(e.valor_periodo),
-      ticket: e.ticket_medio,
-      chave: `ext-${e.canal}`,
-      rotulo: CANAL_LABEL[e.canal] ?? e.canal,
-    })
-  }
+  minhas.push(...somarPorCanal(a.externas, true))
   minhas.sort((x, y) => n(y.receita) - n(x.receita))
 
   const daCasa: Linha[] = a.por_tipo.filter((t) => !t.atribuido)
-  for (const e of a.externas) {
-    if (e.atribuida || n(e.valor_periodo) <= 0) continue
-    daCasa.push({
-      tipo_venda: 'canal_externo',
-      atribuido: false,
-      pedidos: 0,
-      clientes: 0,
-      receita: n(e.valor_periodo),
-      ticket: e.ticket_medio,
-      chave: `ext-${e.canal}`,
-      rotulo: CANAL_LABEL[e.canal] ?? e.canal,
-    })
-  }
+  daCasa.push(...somarPorCanal(a.externas, false))
 
   const maxReceita = Math.max(...minhas.map((t) => n(t.receita)), 1)
 
@@ -91,7 +87,7 @@ export function MeuResultado({ dados }: { dados: Painel }) {
             </p>
             <p className="borrar mt-1 text-xs text-tinta-3">
               {money(atual.receita_erp_atribuida)} pelo sistema
-              {n(atual.receita_externa) > 0 && ` · ${money(atual.receita_externa)} do iFood`}
+              {n(atual.receita_externa) > 0 && ` · ${money(atual.receita_externa)} de iFood/Keeta`}
               {n(atual.receita_manual) > 0 &&
                 ` · ${money(atual.receita_manual)} de ${num(atual.vendas_manuais)} ${
                   atual.vendas_manuais === 1 ? 'venda fechada' : 'vendas fechadas'
@@ -138,7 +134,7 @@ export function MeuResultado({ dados }: { dados: Painel }) {
           detalhe={`${num(atual.clientes_ativos)} clientes seus compraram no período`}
           rodape={<Variacao atual={atual.clientes_novos} anterior={ant.clientes_novos} />}
           destaque
-          ajuda="Clientes cujo primeiro pedido caiu no período e cuja origem é anúncio, QR do iFood ou reativação pelo agente."
+          ajuda="Clientes cujo primeiro pedido caiu no período: anúncio, QR do iFood, reativação pelo agente, WhatsApp, balcão ou instagram. Só a base antiga fica de fora."
         />
         <Kpi
           rotulo="Pedidos meus"
@@ -288,7 +284,9 @@ function LinhasVenda({
                   {t.rotulo ??
                     (t.tipo_venda === 'recompra_espontanea' && !t.atribuido
                       ? 'Recompra de cliente da casa'
-                      : vendaLabel(t.tipo_venda))}
+                      : t.tipo_venda === 'aquisicao_organica' && !t.atribuido
+                        ? '1ª compra de cliente da base antiga'
+                        : vendaLabel(t.tipo_venda))}
                 </span>
               </span>
               <span className="shrink-0 text-sm font-semibold tnum text-tinta">{money(r)}</span>

@@ -189,8 +189,8 @@ export function Aquisicao({ dados }: { dados: Painel }) {
           </div>
         )}
         <p className="mt-4 text-xs leading-relaxed text-tinta-3">
-          O iFood não passa pelo ERP — o investimento dele aparece aqui, mas as vendas vêm do painel
-          do iFood e não entram no CAC/ROAS acima, que é só de Meta Ads.
+          iFood e Keeta não passam pelo ERP — o investimento aparece aqui, mas as vendas vêm do
+          painel de cada app e não entram no CAC/ROAS acima, que é só de Meta Ads.
         </p>
       </Cartao>
     </div>
