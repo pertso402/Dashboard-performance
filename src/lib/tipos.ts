@@ -162,6 +162,21 @@ export type AnuncioTotal = {
   roi_pct: number | string | null
 }
 
+export type Crescimento = {
+  dias_bloco: number
+  corte: string
+  blocos: {
+    inicio: string
+    fim: string
+    sistema: number | string
+    pedidos_sistema: number
+    manual: number | string
+    externos: Record<string, number | string>
+    atribuida: number | string
+    total: number | string
+  }[]
+}
+
 export type Painel = {
   atribuicao: Atribuicao
   kpis: Kpis
@@ -172,6 +187,7 @@ export type Painel = {
   campanha: Campanha
   cac: CacRoas
   anuncioTotal: AnuncioTotal
+  crescimento: Crescimento
 }
 
 // ---------------------------------------------------------------------------

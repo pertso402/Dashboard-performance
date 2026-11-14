@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import type {
-  AnuncioTotal, Atribuicao, CacRoas, Campanha, Coorte, Depoimento, Funil, Kpis, LinhaOrigem,
+  AnuncioTotal, Atribuicao, CacRoas, Crescimento, Campanha, Coorte, Depoimento, Funil, Kpis, LinhaOrigem,
   Painel, PontoSerie,
 } from './tipos'
 
@@ -19,7 +19,7 @@ export async function carregarPainel(
 ): Promise<Painel> {
   const p = { p_inicio: inicio, p_fim: fim }
 
-  const [atribuicao, kpis, origens, serie, coortes, funil, campanha, cac, anuncioTotal] = await Promise.all([
+  const [atribuicao, kpis, origens, serie, coortes, funil, campanha, cac, anuncioTotal, crescimento] = await Promise.all([
     rpc<Atribuicao>('dash_atribuicao', p),
     rpc<Kpis>('dash_kpis', p),
     rpc<LinhaOrigem[]>('dash_origens', p),
@@ -29,9 +29,10 @@ export async function carregarPainel(
     rpc<Campanha>('dash_campanha', p),
     rpc<CacRoas>('dash_cac_roas', p),
     rpc<AnuncioTotal>('dash_anuncio_total', {}),
+    rpc<Crescimento>('dash_crescimento', {}),
   ])
 
-  return { atribuicao, kpis, origens, serie, coortes, funil, campanha, cac, anuncioTotal }
+  return { atribuicao, kpis, origens, serie, coortes, funil, campanha, cac, anuncioTotal, crescimento }
 }
 
 /** Menor e maior data de pedido no banco — usado pelo preset "Todo o período". */

@@ -1,4 +1,5 @@
 import { AnuncioTotal } from './AnuncioTotal'
+import { Crescimento } from './Crescimento'
 import { GraficoAtribuicao, GraficoNovosClientes } from '../components/Graficos'
 import { BarraMini, Cartao, Kpi, Variacao, Vazio } from '../components/Ui'
 import { dataLonga, money, n, num, pct } from '../lib/format'
@@ -166,6 +167,9 @@ export function MeuResultado({ dados }: { dados: Painel }) {
           ajuda="Quanto do faturamento total do delivery no período saiu do trabalho de marketing."
         />
       </div>
+
+      {/* ---- Crescimento mês a mês ---- */}
+      <Crescimento c={dados.crescimento} />
 
       {/* ---- Anúncio desde o início ---- */}
       <AnuncioTotal a={dados.anuncioTotal} />
